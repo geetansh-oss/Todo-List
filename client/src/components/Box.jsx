@@ -1,10 +1,15 @@
-function Box() {
+function Box({task}) {
+
+    function handleDelete(){
+
+    }
 
     return(
         <div>
-           <p>
-            
-           </p>
+            <div>
+                <p id="maintask"></p>
+                <button onClick={handleDelete}>Delete</button>
+            </div>
         </div>
     )
 }

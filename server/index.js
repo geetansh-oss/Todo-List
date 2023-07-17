@@ -1,61 +1,61 @@
 const express = require ('express');
+const mongoose = require('mongoose');
 const cors = require ('cors');
+
 const app = express();
 
 app.use(express.json());
 app.use(cors());
 
-let todos = [];
+
+// database conection
+mongoose.connect('mongodb+srv://geet_rh:heliog90t@cluster0.fl6qau1.mongodb.net/',{
+    useNewUrlParser: true, useUnifiedTopology: true
+}).then(()=>{
+    console.log("Server connected to dB")
+}).catch(()=>{
+    console.error;
+});
+
+// Schema for our database
+const Schema = new mongoose.Schema({
+    text : 
+    {
+        type : String,
+        require: true
+    },
+    isComplete : Boolean
+});
+
+// model
+const Task = mongoose.model('Task' , Schema);
+
 
 // show all the task
-app.get('/todos', (req,res) => {
-    res.send(todos);
+app.get('/todos', async (req, res) => {
+	const todos = await Task.find();
+
+	res.json(todos);
 });
 
 // to get new task
-app.post('/todos', (req,res)=>{
+app.post('/todos', (req, res) => {
+    let Text = req.body.text;
+	const todo = new Task({
+		text: Text
+	});
 
-    const newTodo = {
-        "id" : Math.floor(Math.random() * 1000000),
-        "text" : req.body.text
-    }
-    todos.push(newTodo);
-    res.status(200).send(newTodo);
+	todo.save();
+	res.json(todo);
 });
 
 // to delete a task
+app.delete('/todos/:id', async (req, res) => {
+	const result = await Task.findByIdAndDelete(req.params.id);
 
-app.delete('/todos/:id', (req,res) =>{
-    // const todoIdx = 
-    const todoIdx = findIndex(todos, parseInt(req.params.id));
-    if(todoIdx === -1){
-        res.status(404).send();
-    }else{
-        todos = removeAtIndex(todos, todoIdx);
-        res.status(200).send();
-    }
+	res.json({result});
 });
 
 app.listen(3001, ()=>{
     console.log("server listening to 3001")
 });
-
-
-function findIndex(arr, id){
-    for (let i = 0; i < arr.length; i++) {
-        if(arr[i].id === id){
-            return i;
-        }
-    }
-    return -1; 
-}
-
-function removeAtIndex(arr , index){
-    let newArr = [];
-    for (let i = 0; i < arr.length; i++) {
-        if(i !== index){
-            newArr.push(arr[i]);
-        }
-    } 
-    return newArr; 
-}
